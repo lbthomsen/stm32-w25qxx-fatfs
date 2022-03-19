@@ -8,7 +8,9 @@
 #ifndef W25QXX_DISKIO_H_
 #define W25QXX_DISKIO_H_
 
-extern Diskio_drvTypeDef  w25qxx_Driver;
+//extern Diskio_drvTypeDef  w25qxx_Driver;
+
+//DSTATUS w25qxx_diskio_sethandler(W25QXX_HandleTypeDef *init_w25qxx);
 
 DSTATUS w25qxx_diskio_initialize (BYTE pdrv);
 

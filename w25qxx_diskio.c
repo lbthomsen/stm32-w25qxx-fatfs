@@ -13,19 +13,25 @@
 
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
+extern W25QXX_HandleTypeDef w25qxx;
 
-Diskio_drvTypeDef  w25qxx_Driver =
-{
-	w25qxx_diskio_initialize,
-	w25qxx_diskio_status,
-	w25qxx_diskio_read,
-#if  _USE_WRITE
-	w25qxx_diskio_write,
-#endif  /* _USE_WRITE == 1 */
-#if  _USE_IOCTL == 1
-	w25qxx_diskio_ioctl,
-#endif /* _USE_IOCTL == 1 */
-};
+
+//Diskio_drvTypeDef  w25qxx_Driver =
+//{
+//	w25qxx_diskio_initialize,
+//	w25qxx_diskio_status,
+//	w25qxx_diskio_read,
+//#if  _USE_WRITE
+//	w25qxx_diskio_write,
+//#endif  /* _USE_WRITE == 1 */
+//#if  _USE_IOCTL == 1
+//	w25qxx_diskio_ioctl,
+//#endif /* _USE_IOCTL == 1 */
+//};
+
+//DSTATUS w25qxx_diskio_sethandler(W25QXX_HandleTypeDef *init_w25qxx) {
+//	w25qxx = init_w25qxx;
+//}
 
 /**
   * @brief  Initializes a Drive
@@ -36,6 +42,7 @@ DSTATUS w25qxx_diskio_initialize (
 	BYTE pdrv           /* Physical drive nmuber to identify the drive */
 )
 {
+	DBG("w25qxx_diskio_initialize - pdrv = %d", pdrv);
 	Stat = 0;
     return Stat;
 }
@@ -49,10 +56,8 @@ DSTATUS w25qxx_diskio_status (
 	BYTE pdrv       /* Physical drive number to identify the drive */
 )
 {
-  /* USER CODE BEGIN STATUS */
-    Stat = STA_NOINIT;
+	DBG("w25qxx_diskio_status - pdrv = %d", pdrv);
     return Stat;
-  /* USER CODE END STATUS */
 }
 
 /**
@@ -70,9 +75,9 @@ DRESULT w25qxx_diskio_read (
 	UINT count      /* Number of sectors to read */
 )
 {
-  /* USER CODE BEGIN READ */
+	DBG("w25qxx_diskio_read - pdrv = %d, sector = %lu, count = %u", pdrv, sector, count);
+	w25qxx_read(&w25qxx, sector * w25qxx.sector_size, buff, count * w25qxx.sector_size);
     return RES_OK;
-  /* USER CODE END READ */
 }
 
 /**
@@ -91,10 +96,8 @@ DRESULT w25qxx_diskio_write (
 	UINT count          /* Number of sectors to write */
 )
 {
-  /* USER CODE BEGIN WRITE */
-  /* USER CODE HERE */
+	DBG("w25qxx_diskio_write - pdrv = %d, sector = %lu, count = %u", pdrv, sector, count);
     return RES_OK;
-  /* USER CODE END WRITE */
 }
 #endif /* _USE_WRITE == 1 */
 
@@ -112,9 +115,27 @@ DRESULT w25qxx_diskio_ioctl (
 	void *buff      /* Buffer to send/receive control data */
 )
 {
-  /* USER CODE BEGIN IOCTL */
-    DRESULT res = RES_ERROR;
+	DBG("w25qxx_diskio_ioctl - pdrv = %d, cmd = %d", pdrv, cmd);
+
+	DRESULT res = RES_OK;
+
+	switch (cmd) {
+	case CTRL_SYNC:
+
+		break;
+	case GET_SECTOR_SIZE:
+		*(DWORD*)buff = w25qxx.sector_size;
+		break;
+	case GET_SECTOR_COUNT:
+		*(DWORD*)buff = w25qxx.sectors_in_block * w25qxx.block_count;
+		break;
+	case GET_BLOCK_SIZE:
+		*(DWORD*)buff = w25qxx.block_size;
+		break;
+	default:
+		res = RES_ERROR;
+	}
+
     return res;
-  /* USER CODE END IOCTL */
 }
 #endif /* _USE_IOCTL == 1 */
