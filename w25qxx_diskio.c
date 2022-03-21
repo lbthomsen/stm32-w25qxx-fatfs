@@ -96,7 +96,11 @@ DRESULT w25qxx_diskio_write (
 	UINT count          /* Number of sectors to write */
 )
 {
-	DBG("w25qxx_diskio_write - pdrv = %d, sector = %lu, count = %u", pdrv, sector, count);
+	W25QXX_result_t res;
+	DBG("w25qxx_diskio_write - pdrv = %d, sector = 0x%lx, count = %u", pdrv, sector, count);
+	res = w25qxx_erase(&w25qxx, sector * w25qxx.sector_size, count * w25qxx.sector_size);
+	DBG("erase returned %lu", res);
+	res = w25qxx_write(&w25qxx, sector * w25qxx.sector_size, buff, count * w25qxx.sector_size);
     return RES_OK;
 }
 #endif /* _USE_WRITE == 1 */
@@ -124,12 +128,15 @@ DRESULT w25qxx_diskio_ioctl (
 
 		break;
 	case GET_SECTOR_SIZE:
+		DBG("GET_SECTOR_SIZE, returning %lu", w25qxx.sector_size);
 		*(DWORD*)buff = w25qxx.sector_size;
 		break;
 	case GET_SECTOR_COUNT:
+		DBG("GET_BLOCK_COUNT, returning %lu", w25qxx.block_count);
 		*(DWORD*)buff = w25qxx.sectors_in_block * w25qxx.block_count;
 		break;
 	case GET_BLOCK_SIZE:
+		DBG("GET_BLOCK_SIZE, returning %lu", w25qxx.block_size);
 		*(DWORD*)buff = w25qxx.block_size;
 		break;
 	default:
