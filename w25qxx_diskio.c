@@ -125,7 +125,7 @@ DRESULT w25qxx_diskio_ioctl (
 
 	switch (cmd) {
 	case CTRL_SYNC:
-
+		DBG("CTRL_SYNC");
 		break;
 	case GET_SECTOR_SIZE:
 		DBG("GET_SECTOR_SIZE, returning %lu", w25qxx.sector_size);
